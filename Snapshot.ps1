@@ -66,26 +66,27 @@ try{
     $date = get-date -f yyyyMMdd
     $today = Get-Date
     $snapshotName = "Via-Powershell"+$date
-    #clean up old snapshots
+    #clean up old snapshots -only interested in manual ones
     $snapshots = Get-RDSDBSnapshot -DBInstanceIdentifier bpernikoff -SnapshotType manual
     $takenToday = $false
     foreach($snapshot in $snapshots)
     {
-        $EXPIRATION_DAYS = 2
+        $EXPIRATION_DAYS = 2 #retention time is 2 days
         $backupDateTime = get-date $snapshot.snapshotcreatetime
         $expireDate = (get-date).AddDays($EXPIRATION_DAYS*-1)
         #verify if the snapshot is older than two days tnen delete it
         if (($backupDateTime) -lt ($expireDate)){
-            if ($snapshot.SnapshotType -eq "manual"){
-                WriteToLog ($snapshot.DBSnapshotIdentifier.ToString() + "is over 2 days old and is being deleted.")
+            if ($snapshot.SnapshotType -eq "manual" -and $snapshot.Status -eq "available"){
+                WriteToLog ($snapshot.DBSnapshotIdentifier.ToString() + "is over 2 days old and will be deleted.")
                 Remove-RDSDBSnapshot -DBSnapshotIdentifier $snapshot.DBSnapshotIdentifier -Force
             }         
         }
-        #verify if a snapshot was taken today
-        if($backupDateTime.Date -eq $today.Date -and $snapshot.SnapshotType -eq "manual"){
+        #verify if a snapshot was taken today including in creating status which don't yet have a createtime
+        if($backupDateTime.Date -eq $today.Date -or $backupDateTime -eq [DateTime]::MinValue){
             $takenToday = $true
         }
     }
+    #if a snapshot was not taken today then create one
     if(($takenToday) -eq ($false))
     {
         WriteToLog "Creating new snapshot."
@@ -98,4 +99,4 @@ catch [Exception]
     $function = "Creating New Instance"
     $exception = $_.Exception.ToString()
     WriteToLog "function: $exception" -isException $true
-s}    
+}    
