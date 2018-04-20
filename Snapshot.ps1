@@ -3,7 +3,6 @@ Import-Module "C:\Program Files (x86)\AWS Tools\PowerShell\AWSPowerShell\AWSPowe
 #Log
 $LOG_PATH="C:\AWS\Logs\"
 
-
 function WriteToLog([string[]] $text, [bool] $isException = $false)
 {    
     try
@@ -68,35 +67,35 @@ try{
     $today = Get-Date
     $snapshotName = "Via-Powershell"+$date
     #clean up old snapshots
-    $snapshots = Get-RDSDBSnapshot -DBInstanceIdentifier bpernikoff
+    $snapshots = Get-RDSDBSnapshot -DBInstanceIdentifier bpernikoff -SnapshotType manual
     $takenToday = $false
     foreach($snapshot in $snapshots)
     {
         $EXPIRATION_DAYS = 2
         $backupDateTime = get-date $snapshot.snapshotcreatetime
         $expireDate = (get-date).AddDays($EXPIRATION_DAYS*-1)
-       #verify if the snapshot is older than two days tnen delete it
-       if (($backupDateTime) -lt ($expireDate)){
-           if ($snapshot.SnapshotType -eq "manual"){
-               WriteToLog $snapshot.DBSnapshotIdentifier is over 2 days old and is being deleted.
-               Remove-RDSDBSnapshot -DBSnapshotIdentifier $snapshot.DBSnapshotIdentifier 
-           }         
-       }
-       #verify if a snapshot was taken today
-       if($backupDateTime.Date -eq $today.Date -and $snapshot.SnapshotType -eq "manual"){
-           $takenToday = $true
-       }
+        #verify if the snapshot is older than two days tnen delete it
+        if (($backupDateTime) -lt ($expireDate)){
+            if ($snapshot.SnapshotType -eq "manual"){
+                WriteToLog ($snapshot.DBSnapshotIdentifier.ToString() + "is over 2 days old and is being deleted.")
+                Remove-RDSDBSnapshot -DBSnapshotIdentifier $snapshot.DBSnapshotIdentifier -Force
+            }         
+        }
+        #verify if a snapshot was taken today
+        if($backupDateTime.Date -eq $today.Date -and $snapshot.SnapshotType -eq "manual"){
+            $takenToday = $true
+        }
     }
-     if(($takenToday) -eq ($false))
-     {
-         WriteToLog "Creating new snapshot."
-         New-RDSDBSnapshot -DBSnapshotIdentifier $snapshotName -DBInstanceIdentifier "bpernikoff"
-     }
-     WriteToLog "Process Complete"
-}
-    catch [Exception]
+    if(($takenToday) -eq ($false))
     {
-        $function = "Creating New Instance"
-        $exception = $_.Exception.ToString()
-        WriteToLog "function: $exception" -isException $true
-    }    
+        WriteToLog "Creating new snapshot."
+        New-RDSDBSnapshot -DBSnapshotIdentifier $snapshotName -DBInstanceIdentifier "bpernikoff"
+    }
+    WriteToLog "Process Complete"
+}
+catch [Exception]
+{
+    $function = "Creating New Instance"
+    $exception = $_.Exception.ToString()
+    WriteToLog "function: $exception" -isException $true
+s}    
