@@ -1,0 +1,18 @@
+1) Download Git for Windows client
+  1a) Uncheck Windows Explorer Integration
+  1b) Use the Nano editor by default
+  1c) Accept the rest of the defaults
+2) Confirm installation by opening CMD and typing git. Verify that it's recognized. If not a restart is required
+3) CD to the folder where the repository will be stored CD C:\Path\To\Repository\Root (the directory should exist)
+4) Issue the following command: git clone https://username:password@bitbucket.org/user_name/project_name.git.
+   4a) Verify the project was downloaded into the directory in step 3
+5) Open Notepad, type the following and save as bitbuckcet.bat in the folder created in step 3:
+   cd C:\path\to\directory\in\step3
+   git pull
+   5a) The PullGitAndEmail.ps1 script could be used to pull and send an email.
+6) In Windows Task Scheduler, set up a daily task to invoke PullGitAndEmail on a daily basis. Program/Script Powershell.exe Add Arguements C:\Users\Benzy\Documents\Bitbucket\PullGitAndEmail.ps1
+7) Set the task to run even when user is logged off. 
+
+
+
+   
