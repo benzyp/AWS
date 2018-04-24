@@ -1,0 +1,12 @@
+1) Insall AWS windows tools for powershell
+2) Run Powershell as administrator bypass execution policly if necessary to import AWS tools: 
+   Import-Module "C:\Program Files (x86)\AWS Tools\PowerShell\AWSPowerShell\AWSPowerShell.psd1"
+3) set up an IAM rds_user account with full permissions to RDS 
+4) set aws credentials on the machine https://docs.aws.amazon.com/powershell/latest/userguide/specifying-your-aws-credentials.html
+   Capture the access key or generate a new one so the private key can be captured. It will not be viewable on subsequent times.
+5) Run the following commands in order to establish the user on your local and peresist for all sessions
+   Set-AWSCredential -AccessKey AKIAJYFDHSDYCB3BXWBQ -SecretKey KliMqy2Kl6SNNHwxocm7cP791JN6fJ3KolvgLxaI -StoreAs rds_user
+   Initialize-AWSDefaultConfiguration -ProfileName MyProfileName -Region us-east-1
+6) set up a windows task in the scheduler to run daily. On General tab set to run even if user is not logged on. This will require the current windows
+   account to persist.point to the snapshot.ps1 script
+7) Set the scheduled task action as Powershell.exe and commands as -ExecutionPolicy Bypass -File C:\Users\TA\Desktop\Images\AWSBackup\Snapshot_prod.ps1
