@@ -76,7 +76,8 @@ try{
         $expireDate = (get-date).AddDays($EXPIRATION_DAYS*-1)
         #verify if the snapshot is older than two days tnen delete it
         if (($backupDateTime) -lt ($expireDate)){
-            if ($snapshot.SnapshotType -eq "manual" -and $snapshot.Status -eq "available"){
+            #only delete manual snapshots in available state not containing final in their name
+            if ($snapshot.SnapshotType -eq "manual" -and $snapshot.Status -eq "available" -and ($snapshot.DBSnapshotIdentifier.Contains("final")) -ne $true){
                 WriteToLog ($snapshot.DBSnapshotIdentifier.ToString() + "is over 2 days old and will be deleted.")
                 Remove-RDSDBSnapshot -DBSnapshotIdentifier $snapshot.DBSnapshotIdentifier -Force
             }         
