@@ -1,6 +1,6 @@
 $MailMessage = New-Object system.net.mail.mailmessage
 $mailmessage.from = ("gmail_address@gmail.com")
-$mailmessage.To.add("benhalberstam@yahoo.com")
+$mailmessage.To.add("to_address@yahoo.com")
 $SmtpServer = "smtp.gmail.com" 
 $SmtpClient = New-Object Net.Mail.SmtpClient($SmtpServer, 587) 
 #$smtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
