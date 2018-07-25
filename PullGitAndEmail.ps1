@@ -10,7 +10,8 @@ $SMTPClient.Credentials = New-Object System.Net.NetworkCredential("gmail_email_a
 
 try{
     cd C:\Users\Benzy\Documents\Bitbucket\baishoraah
-    $output = git pull
+    $output = ""
+    $output = $(git pull origin master)
     $dayOfWeek = (get-date).DayOfWeek
     switch($dayOfWeek)
     {
