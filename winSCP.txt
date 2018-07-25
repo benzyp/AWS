@@ -1,0 +1,8 @@
+option batch on
+option confirm off
+cd C:\AWS
+open LakewoodSimcha
+option transfer binary
+get /home/ec2-user/LakewoodSimcha/app/static/app/images/* C:\AWS\testlocal\*
+synchronize local C:\AWS\testlocal /home/ec2-user/LakewoodSimcha/app/static/app/images
+exit
