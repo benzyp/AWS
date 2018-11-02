@@ -1,7 +1,7 @@
 Import-Module "C:\Program Files (x86)\AWS Tools\PowerShell\AWSPowerShell\AWSPowerShell.psd1"
 
 #Log
-$LOG_PATH="C:\AWS\Logs\"
+$LOG_PATH="C:\Users\TA\Desktop\Images\AWSBackup\Logs\"
 
 function WriteToLog([string[]] $text, [bool] $isException = $false)
 {    
@@ -60,14 +60,14 @@ function GetLogDate
 }
 
 try{
-    WriteTOLog "Starting Process"
+    WriteTOLog "Starting Process for verificationlog-production-aurora-cluster instance."
     #Set-AWSCredential -AccessKey AKIAIOSFODNN7EXAMPLE -SecretKey wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY -StoreAs RDS_SCRIPT_PROFILE
     Set-AWSCredential -ProfileName rds_user
     $date = get-date -f yyyyMMdd
     $today = Get-Date
-    $snapshotName = "Via-Powershell"+$date
+    $snapshotName = "Via-Powershell-production-aurora-cluster"+$date
     #clean up old snapshots -only interested in manual ones
-    $snapshots = Get-RDSDBSnapshot -DBInstanceIdentifier bpernikoff -SnapshotType manual
+    $snapshots = Get-RDSDBClusterSnapshot -DBClusterIdentifier verificationlog-production-aurora-cluster -SnapshotType manual
     $takenToday = $false
     foreach($snapshot in $snapshots)
     {
@@ -79,7 +79,7 @@ try{
             #only delete manual snapshots in available state not containing final in their name
             if ($snapshot.SnapshotType -eq "manual" -and $snapshot.Status -eq "available" -and ($snapshot.DBSnapshotIdentifier.Contains("final")) -ne $true){
                 WriteToLog ($snapshot.DBSnapshotIdentifier.ToString() + "is over 2 days old and will be deleted.")
-                Remove-RDSDBSnapshot -DBSnapshotIdentifier $snapshot.DBSnapshotIdentifier -Force
+                Remove-RDSDBClusterSnapshot -DBClusterSnapshotIdentifier $snapshot.DBClusterSnapshotIdentifier -Force
             }         
         }
         #verify if a snapshot was taken today including in creating status which don't yet have a createtime
@@ -90,10 +90,10 @@ try{
     #if a snapshot was not taken today then create one
     if(($takenToday) -eq ($false))
     {
-        WriteToLog "Creating new snapshot."
-        New-RDSDBSnapshot -DBSnapshotIdentifier $snapshotName -DBInstanceIdentifier "bpernikoff"
+        WriteToLog "Creating new snapshot for verificationlog-production-aurora-cluster."
+        New-RDSDBClusterSnapshot -DBClusterSnapshotIdentifier $snapshotName -DBClusterIdentifier "verificationlog-production-aurora-cluster"
     }
-    WriteToLog "Process Complete"
+    WriteToLog "Process Complete for verificationlog-production-aurora-cluster instance."
 }
 catch [Exception]
 {
