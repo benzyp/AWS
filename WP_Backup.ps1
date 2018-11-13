@@ -27,17 +27,16 @@ try
     # Setup session options
     $sessionOptions = New-Object WinSCP.SessionOptions -Property @{
         Protocol = [WinSCP.Protocol]::Sftp
-        HostName = ".compute-1.amazonaws.com"
-        UserName = ""
-        SshPrivateKeyPath = "C:\Users\keyfile.ppk"
-        SshHostKeyFingerprint = ="
-        #PermitRootLogin = "yes"
+        HostName = "ec2-user@.compute-1.amazonaws.com"
+        UserName = "ec2-user"
+        SshPrivateKeyPath = ".ppk"
+        SshHostKeyFingerprint = "ssh-="
     }
  
     try
     {
         $session = New-Object WinSCP.Session
-        $session.SessionLogPath = "C:\Users\LogFile.txt"
+        $session.SessionLogPath = "C:\AWS\LogFile.txt"
 
         # Connect
         $session.Open($sessionOptions)
@@ -45,18 +44,16 @@ try
         # Upload files
         $transferOptions = New-Object WinSCP.TransferOptions
         $transferOptions.TransferMode = [WinSCP.TransferMode]::Binary
- 
-        $transferResult = $session.GetFiles("/var/www/html/wp-content/*", "C:\Users\wp-content\*", $False, $transferOptions)
+        $synchronizationMode = New-Object WinSCP.SynchronizationMode
+        $synchronizationMode.value__  = [WinSCP.SynchronizationMode]::Local
+        $synchronizationCriteria = New-Object WinSCP.SynchronizationCriteria
+        $synchronizationCriteria.value__  = [WinSCP.SynchronizationCriteria]::Time
 
-        # Throw on any error
-        $transferResult.Check()
+
+        $synchronizationResult = $session.SynchronizeDirectories($synchronizationMode,"C:\AWS\testlocal","/home/ec2-user/app/static/app/images", $synchronizationMode, $transferOptions);
  
-        # Print results
-        foreach ($transfer in $transferResult.Transfers)
-        {
-            Write-Host "Upload of $($transfer.FileName) succeeded"
-        }
-        $session.GetFiles("/var/www/html/wp-config.php", "C:\Users\wp-config.php", $False, $transferOptions)
+        # Throw on any error
+        $synchronizationResult.Check();
     }
     finally
     {
