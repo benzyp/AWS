@@ -27,33 +27,40 @@ try
     # Setup session options
     $sessionOptions = New-Object WinSCP.SessionOptions -Property @{
         Protocol = [WinSCP.Protocol]::Sftp
-        HostName = "ec2-user@.compute-1.amazonaws.com"
-        UserName = "ec2-user"
-        SshPrivateKeyPath = ".ppk"
-        SshHostKeyFingerprint = "ssh-="
+        HostName = ".compute-1.amazonaws.com"
+        UserName = "ubuntu"
+        SshPrivateKeyPath = "C:\Users\.ppk"
+        SshHostKeyFingerprint = "ssh-ed25519 "
+        #PermitRootLogin = "yes"
     }
  
     try
     {
         $session = New-Object WinSCP.Session
-        $session.SessionLogPath = "C:\AWS\LogFile.txt"
+        $session.SessionLogPath = "C:\Users\LogFile.txt"
 
         # Connect
         $session.Open($sessionOptions)
- 
-        # Upload files
+
+
+  # Sync properties 
         $transferOptions = New-Object WinSCP.TransferOptions
         $transferOptions.TransferMode = [WinSCP.TransferMode]::Binary
+        $transferOptions.FileMask = " | *.log"
         $synchronizationMode = New-Object WinSCP.SynchronizationMode
         $synchronizationMode.value__  = [WinSCP.SynchronizationMode]::Local
         $synchronizationCriteria = New-Object WinSCP.SynchronizationCriteria
         $synchronizationCriteria.value__  = [WinSCP.SynchronizationCriteria]::Time
 
-
-        $synchronizationResult = $session.SynchronizeDirectories($synchronizationMode,"C:\AWS\testlocal","/home/ec2-user/app/static/app/images", $synchronizationMode, $transferOptions);
+        $synchronizationResult = $session.SynchronizeDirectories($synchronizationMode,"","", $False, $False, $synchronizationCriteria, $transferOptions);
+        $synchronizationResult.Check()
+        
+        $synchronizationResult = $session.SynchronizeDirectories($synchronizationMode,"","", $False, $False, $synchronizationCriteria, $transferOptions);
+        $synchronizationResult.Check()
  
-        # Throw on any error
-        $synchronizationResult.Check();
+        #sync wp-config.php file
+        $transferOperationResult = $session.GetFiles("", "", $False, $transferOptions)
+        $transferOperationResult.check()
     }
     finally
     {
